@@ -35,7 +35,7 @@ jobs:
           echo {\"username\": \"${{ secrets.KAGGLE_USERNAME }}\", \"key\": \"${{ secrets.KAGGLE_KEY }}\"} > /home/runner/.kaggle/kaggle.json 
 
       - name: 📦 Download datasets from kaggle
-        run: kaggle competitions download -c ml2021spring-hw2 && unzip ./ml2021spring-hw2.zip
+        run: kaggle competitions download -c ml2021spring-hw2 && unzip -o ./ml2021spring-hw2.zip
 
       - name: 📦 Install dependencies
         run:  pip install -r requirements.txt
