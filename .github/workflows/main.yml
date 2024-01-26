@@ -30,7 +30,7 @@ jobs:
         run: pip install --user kaggle
 
       - name: 🏗 Setting up kaggle
-        run: touch /home/runner/.kaggle/kaggle.json && kaggle set -n username -v wilson920430 && kaggle set -n key -v ${{ secrets.KAGGLE_KEY }}
+        run: cd /home/runner/.kaggle && touch kaggle.json && kaggle set -n username -v wilson920430 && kaggle set -n key -v ${{ secrets.KAGGLE_KEY }}
 
       - name: 📦 Download datasets from kaggle
         run: kaggle competitions download -c ml2021spring-hw2 && unzip ./ml2021spring-hw2.zip
