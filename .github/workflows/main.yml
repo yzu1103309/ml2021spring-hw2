@@ -1,0 +1,48 @@
+name: Train Model
+on:
+  workflow_dispatch:
+    inputs:
+      os:
+        type: choice
+        description: OS to run on.
+        options:
+          - ubuntu-latest
+jobs:
+  training:
+    runs-on: ${{ github.event.inputs.os }}
+    steps:
+      - name: Check for KAGGLE_KEY
+        run: |
+          if [ -z "${{ secrets.KAGGLE_KEY }}" ]; then
+            echo "You must provide an KAGGLE_KEY secret"
+            exit 1
+          fi
+
+      - name: 🏗 Setup repo
+        uses: actions/checkout@v2
+
+      - name: 🏗 Set up Python 3.10.12
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.12
+
+      - name: 🏗 Install Requirements
+        run: pip install --user kaggle
+
+      - name: 🏗 Setting up kaggle
+        run: kaggle set -n username -v wilson920430 && kaggle set -n key -v ${{ secrets.KAGGLE_KEY }}
+
+      - name: 📦 Download datasets from kaggle
+        run: kaggle competitions download -c ml2021spring-hw2 && unzip ./ml2021spring-hw2.zip
+
+      - name: 📦 Install dependencies
+        run:  pip install -r requirements.txt
+
+      - name: 👷 Training Model
+        run: python3 share_mlspring2021_hw2_1.py
+
+      - name: 📱 Upload binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: prediction.csv
+          path: ./prediction.csv
