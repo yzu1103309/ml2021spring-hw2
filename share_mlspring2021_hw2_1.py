@@ -171,7 +171,7 @@ print(f'DEVICE: {device}')
 
 # TODO: Feel free to change the training parameters here.
 # training parameters
-num_epoch = 20  # number of training epoch
+num_epoch = 40  # number of training epoch
 learning_rate = 0.0001  # learning rate
 
 # the path where checkpoint saved
