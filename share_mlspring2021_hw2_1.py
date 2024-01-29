@@ -74,7 +74,7 @@ class TIMITDataset(Dataset):
 """Split the labeled data into a training set and a validation set, """
 # TODO: you can modify the variable `VAL_RATIO` to change the ratio of validation data.
 
-VAL_RATIO = 0.2
+VAL_RATIO = 0.3
 
 percent = int(train.shape[0] * (1 - VAL_RATIO))  # shape: [#, 1*429]
 # _x: data, _y: label (One-hot Vectors)
@@ -84,7 +84,7 @@ print('Size of validation set: {}'.format(val_x.shape))
 
 """Create a data loader from the dataset, feel free to tweak the variable `BATCH_SIZE` here."""
 # TODO: Batch size
-BATCH_SIZE = 64
+BATCH_SIZE = 128
 
 import torch
 from torch.utils.data import DataLoader
@@ -122,7 +122,7 @@ class Classifier(nn.Module):
         self.layer3 = nn.Linear(512, 128)
         self.out = nn.Linear(128, 39)  # output 39 phonemes (one-hot vector)
 
-        self.act_fn = nn.Sigmoid()
+        self.act_fn = nn.ReLU()
 
     def forward(self, x):
         x = self.layer1(x)
@@ -163,7 +163,7 @@ def same_seeds(seed):
 
 # fix random seed for reproducibility
 # TODO: CHANGE SEED
-same_seeds(0)
+same_seeds(12345)
 
 # get device
 device = get_device()
@@ -171,7 +171,7 @@ print(f'DEVICE: {device}')
 
 # TODO: Feel free to change the training parameters here.
 # training parameters
-num_epoch = 40  # number of training epoch
+num_epoch = 45  # number of training epoch
 learning_rate = 0.0001  # learning rate
 
 # the path where checkpoint saved
@@ -193,11 +193,11 @@ for epoch in range(num_epoch):
 
     # training
     model.train()  # set the model to training mode
-    for i, data in enumerate(train_loader):
+    for i, data in enumerate(train_loader):  # train_loader grouped by batch_size
         inputs, labels = data
         inputs, labels = inputs.to(device), labels.to(device)
         optimizer.zero_grad()
-        outputs = model(inputs) # output: one-hot vector
+        outputs = model(inputs) # output: one-hot vectors
         batch_loss = criterion(outputs, labels) # cross entropy loss: contains log_softmax
         _, train_pred = torch.max(outputs, 1)  # get the index of the class with the highest probability
         batch_loss.backward()
