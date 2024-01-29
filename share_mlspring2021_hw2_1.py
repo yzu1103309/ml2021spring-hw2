@@ -51,6 +51,7 @@ print('Size of testing data: {}'.format(test.shape))
 """## Create Dataset"""
 from torch.utils.data import Dataset
 
+
 class TIMITDataset(Dataset):
     def __init__(self, X, y=None):
         self.data = torch.from_numpy(X).float()
@@ -71,12 +72,12 @@ class TIMITDataset(Dataset):
 
 
 """Split the labeled data into a training set and a validation set, """
-#TODO: you can modify the variable `VAL_RATIO` to change the ratio of validation data.
+# TODO: you can modify the variable `VAL_RATIO` to change the ratio of validation data.
 
 VAL_RATIO = 0.2
 
-percent = int(train.shape[0] * (1 - VAL_RATIO))     # shape: [#, 1*429]
-# _x: data, _y: label
+percent = int(train.shape[0] * (1 - VAL_RATIO))  # shape: [#, 1*429]
+# _x: data, _y: label (One-hot Vectors)
 train_x, train_y, val_x, val_y = train[:percent], train_label[:percent], train[percent:], train_label[percent:]
 print('Size of training set: {}'.format(train_x.shape))
 print('Size of validation set: {}'.format(val_x.shape))
@@ -111,6 +112,7 @@ Define model architecture, you are encouraged to change and experiment with the 
 
 import torch.nn as nn
 
+
 # TODO: Change Network
 class Classifier(nn.Module):
     def __init__(self):
@@ -118,7 +120,7 @@ class Classifier(nn.Module):
         self.layer1 = nn.Linear(429, 1024)
         self.layer2 = nn.Linear(1024, 512)
         self.layer3 = nn.Linear(512, 128)
-        self.out = nn.Linear(128, 39)
+        self.out = nn.Linear(128, 39)  # output 39 phonemes (one-hot vector)
 
         self.act_fn = nn.Sigmoid()
 
@@ -159,8 +161,6 @@ def same_seeds(seed):
     torch.backends.cudnn.deterministic = True
 
 
-
-
 # fix random seed for reproducibility
 # TODO: CHANGE SEED
 same_seeds(0)
@@ -197,8 +197,8 @@ for epoch in range(num_epoch):
         inputs, labels = data
         inputs, labels = inputs.to(device), labels.to(device)
         optimizer.zero_grad()
-        outputs = model(inputs)
-        batch_loss = criterion(outputs, labels)
+        outputs = model(inputs) # output: one-hot vector
+        batch_loss = criterion(outputs, labels) # cross entropy loss: contains log_softmax
         _, train_pred = torch.max(outputs, 1)  # get the index of the class with the highest probability
         batch_loss.backward()
         optimizer.step()
@@ -218,7 +218,7 @@ for epoch in range(num_epoch):
                 _, val_pred = torch.max(outputs, 1)
 
                 val_acc += (
-                            val_pred.cpu() == labels.cpu()).sum().item()  # get the index of the class with the highest probability
+                        val_pred.cpu() == labels.cpu()).sum().item()  # get the index of the class with the highest probability
                 val_loss += batch_loss.item()
 
             print('[{:03d}/{:03d}] Train Acc: {:3.6f} Loss: {:3.6f} | Val Acc: {:3.6f} loss: {:3.6f}'.format(
@@ -237,6 +237,7 @@ for epoch in range(num_epoch):
         ))
 
 # if not validating, save the last epoch
+# TODO: No Validation?
 if len(val_set) == 0:
     torch.save(model.state_dict(), model_path)
     print('saving model at last epoch')
@@ -272,6 +273,9 @@ with torch.no_grad():
 
 After finish running this block, download the file `prediction.csv` from the files section on the left-hand side and submit it to Kaggle.
 """
+for i in range(1, len(predict) - 1):
+    if predict[i - 1] == predict[i + 1] and predict[i] != predict[i - 1]:
+        predict[i] = predict[i - 1]
 
 with open('prediction.csv', 'w') as f:
     f.write('Id,Class\n')
